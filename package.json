@@ -1,0 +1,14 @@
+{
+  "name": "sortedMergeBy",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "dependencies": {
+    "highland": "caolan/highland#3.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "2.3.x"
+  }
+}
