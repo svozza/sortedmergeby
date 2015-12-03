@@ -24,7 +24,7 @@ let s1 = _((push, next) => {
     setTimeout(() => push(null, 195), 40);
     setTimeout(() => push(null, 711), 50);
     setTimeout(() => push(null, 800), 200);
-    setTimeout(() => push(null, _.nil), 500);
+    setTimeout(() => push(null, _.nil), 300);
 });
 
 let s2 = _((push, next) => {
@@ -40,7 +40,7 @@ let s1Rev = _((push, next) => {
     setTimeout(() => push(null, 711), 40);
     setTimeout(() => push(null, 195), 50);
     setTimeout(() => push(null, 45), 200);
-    setTimeout(() => push(null, _.nil), 500);
+    setTimeout(() => push(null, _.nil), 210);
 });
 
 let s2Rev = _((push, next) => {
@@ -54,41 +54,74 @@ let s2Rev = _((push, next) => {
 const sortedAsync = [6, 9, 45, 195, 200, 711, 715, 800];
 const sortedAsyncRev = sortedAsync.concat([]).reverse();
 
+let errS2 = _((push, next) => {
+    setTimeout(() => push(null, 10), 100);
+    setTimeout(() => push(null, 20), 150);
+    setTimeout(() => push(null, 30), 300);
+    setTimeout(() => push(new Error('ignore')), 315);
+    setTimeout(() => push(null, 40), 415);
+    setTimeout(() => push(null, _.nil), 500);
+});
+
+const sortedErrS2 = [10, 20, 30, 40];
+const errSorted = sortedErrS2.concat(sorted)
+    .sort((a, b) => a - b);;
+
 const asc = (a, b) => a < b;
 const desc = (a, b) => a > b;
 
-describe('sortedMergeBy', function() {
+describe('sortedMergeBy', () => {
 
-    it('sorts an ascending synchronous stream', (done) => {
-        sortedMergeBy(asc, _([xs, xs1, xs2]))
-            .toArray(xs => {
-                assert.deepEqual(sorted, xs);
-                done();
-            });
+    describe('ascending', () => {
+
+        it('sorts an ascending synchronous stream', (done) => {
+            sortedMergeBy(asc, _([xs, xs1, xs2]))
+                .toArray(xs => {
+                    assert.deepEqual(sorted, xs);
+                    done();
+                });
+        });
+
+        it('sorts an ascending asynchronous stream', (done) => {
+            sortedMergeBy(asc, _([s1, s2]))
+                .toArray(xs => {
+                    assert.deepEqual(sortedAsync, xs);
+                    done();
+                });
+        });
+
     });
 
-    it('sorts an descending synchronous stream', (done) => {
-        sortedMergeBy(desc, _([xsRev, xs1Rev, xs2Rev]))
-            .toArray(xs => {
-                assert.deepEqual(sortedRev, xs);
-                done();
-            });
+    describe('descending', () => {
+
+        it('sorts an descending synchronous stream', (done) => {
+            sortedMergeBy(desc, _([xsRev, xs1Rev, xs2Rev]))
+                .toArray(xs => {
+                    assert.deepEqual(sortedRev, xs);
+                    done();
+                });
+        });
+
+        it('sorts an descending asynchronous stream', (done) => {
+            sortedMergeBy(desc, _([s1Rev, s2Rev]))
+                .toArray(xs => {
+                    assert.deepEqual(sortedAsyncRev, xs);
+                    done();
+                });
+        });
+
     });
 
-    it('sorts an ascending asynchronous stream', (done) => {
-        sortedMergeBy(asc, _([s1, s2]))
-            .toArray(xs => {
-                assert.deepEqual(sortedAsync, xs);
-                done();
-            });
-    });
+    describe('errors', () => {
 
-    it('sorts an descending asynchronous stream', (done) => {
-        sortedMergeBy(desc, _([s1Rev, s2Rev]))
-            .toArray(xs => {
-                assert.deepEqual(sortedAsyncRev, xs);
-                done();
-            });
+        it('sorts a stream with errors', (done) => {
+            sortedMergeBy(asc, _([errS2, xs, xs1, xs2]))
+                .errors(err => assert.equal(err.message, 'ignore'))
+                .toArray(xs => {
+                    assert.deepEqual(errSorted, xs);
+                    done();
+                });
+        });
     });
 
 });
