@@ -5,10 +5,10 @@
     "test": "mocha --recursive"
   },
   "dependencies": {
-    "highland": "caolan/highland#3.0.0"
+    "highland": "caolan/highland#master"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "mocha": "2.3.x"
+    "chai": "3.x",
+    "mocha": "2.x"
   }
 }
